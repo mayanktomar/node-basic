@@ -1,4 +1,4 @@
-import { createUser, deleteUser, getAllUsers, getUserById, updateUser } from "../services/userService.js";
+import { createUser, deleteUser, getAllUsers, getUserById, loginUser, refreshToken, updateUser } from "../services/userService.js";
 
 export const createUserHandler = async(req,res) => {
     let userData = req.body;
@@ -48,5 +48,29 @@ export const deleteUserHandler = async(req,res) => {
         res.send({message:'user deleted successfully'});
     } catch (err) {
         res.status(500).send({message:'user deletion failed.'});
+    }
+}
+
+export const loginUserHandler = async(req,res) => {
+    try {
+        const userData = req.body;
+        const user = await loginUser(userData);
+        if (user.status=='error') {
+            res.status(401).send(user);
+        } else {
+            res.status(200).send(user);
+        }
+    } catch (err) {
+        res.status(500).send({message:'error while logging in'})
+    }
+}
+
+export const refreshTokenHandler = async(req,res) => {
+    try {
+        let tokens = req.body;
+        let newTokens = await refreshToken(tokens);
+        return res.status(200).send(newTokens);
+    } catch (err) {
+        return res.status(500).send('Error while refreshing the access token');
     }
 }

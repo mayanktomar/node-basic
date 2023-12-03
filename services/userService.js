@@ -1,6 +1,80 @@
 import { Users } from "../models/UserModel.js";
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import { constants } from "../constants.js";
 
+
+const sercretKey = constants.secretKey;
+export const loginUser = async (userData) => {
+    // userData = {
+    //     username: 'testuser1',
+    //     password: 'abc@123'
+    // }
+    try {
+        const emailId = userData.email;
+        const passwordByUser = userData.password; //abc@123
+        console.log("emailId",emailId);
+        const userDocument = await Users.findOne({email:emailId});
+        //userDocument -> null
+        //null -> false
+        //!null -> true
+        if (!userDocument) {
+            return ({status:'error',message:'user does not exist'});
+        }
+        const hashedPassword = userDocument.password; //hdahfuwhfiewu@8ue983jdueuq8u
+        const match = await bcrypt.compare(passwordByUser,hashedPassword);
+
+        if (!match) {
+            return ({status:'error',message:'password does not match'});
+        }
+
+        const payloadForAccessToken = {
+            name:userDocument.name,
+            email:userDocument.email,
+            age:userDocument.age,
+            gender:userDocument.gender
+        }
+
+        const payloadForRefreshToken = {
+            id: userDocument._id
+        }
+
+        const accessToken = jwt.sign(payloadForAccessToken,sercretKey,{expiresIn:'1h'});
+        const refreshToken  = jwt.sign(payloadForRefreshToken,sercretKey,{expiresIn:'24h'});
+
+        return ({status:'success',data:{accessToken,refreshToken}});
+
+    } catch {
+        console.log("err",err);
+        throw err;
+    }
+}
+
+export const refreshToken = async (tokens) => {
+    try {
+        let accessToken = tokens.accessToken;
+        let refreshToken = tokens.refreshToken;
+
+        //Check if the refresh token is expired and is valid(signed using the same secret key).
+        let decodedToken = jwt.verify(refreshToken,sercretKey);
+        
+        let decodedAccessToken = jwt.verify(accessToken,sercretKey);
+
+        let newExpiry = (new Date()/1000) + 3600;
+        console.log("new expiry",newExpiry);
+        decodedAccessToken.exp = newExpiry;
+        let newAccessToken = await jwt.sign(decodedAccessToken,sercretKey);
+
+        return {
+            accessToken: newAccessToken,
+            refreshToken: refreshToken
+        }
+
+    } catch (err) {
+        console.log('err',err);
+        throw err;
+    }
+}
 export const createUser = async (userData) => {
     try {
         let password = userData.password;

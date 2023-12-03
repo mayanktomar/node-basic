@@ -26,7 +26,6 @@ database.on('connected',()=>{
     });
 });
 
-console.log("Here")
 database.on('error',(err)=>{
     console.log("Error while connecting to database...",err);
 })
