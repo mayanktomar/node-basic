@@ -1,10 +1,12 @@
 import express, { json } from 'express';
 import mongoose from 'mongoose';
 import { routes } from './routes.js';
+import cors from 'cors';
 
 const app = express();
 
 app.use(express.json());
+app.use(cors());
 
 const databaseUrl = "mongodb+srv://mayanktomar1607:gW10YpKnlp6MXoNo@cluster0.jnw4syn.mongodb.net/ecommerce";
 mongoose.connect(databaseUrl);
