@@ -23,6 +23,8 @@ const userSchema = new mongoose.Schema({
     gender: {
         type:String
     }
+},{
+    timestamps: true
 });
 
 const Users = mongoose.model('users',userSchema);

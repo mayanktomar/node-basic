@@ -39,8 +39,8 @@ export const loginUser = async (userData) => {
             id: userDocument._id
         }
 
-        const accessToken = jwt.sign(payloadForAccessToken,sercretKey,{expiresIn:'1h'});
-        const refreshToken  = jwt.sign(payloadForRefreshToken,sercretKey,{expiresIn:'24h'});
+        const accessToken = jwt.sign(payloadForAccessToken,sercretKey,{expiresIn:'1m'});
+        const refreshToken  = jwt.sign(payloadForRefreshToken,sercretKey,{expiresIn:'3m'});
 
         return ({status:'success',data:{accessToken,refreshToken}});
 
@@ -60,7 +60,7 @@ export const refreshToken = async (tokens) => {
         
         let decodedAccessToken = jwt.verify(accessToken,sercretKey);
 
-        let newExpiry = (new Date()/1000) + 3600;
+        let newExpiry = (new Date()/1000) + 60;
         console.log("new expiry",newExpiry);
         decodedAccessToken.exp = newExpiry;
         let newAccessToken = await jwt.sign(decodedAccessToken,sercretKey);
